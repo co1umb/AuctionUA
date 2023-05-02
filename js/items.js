@@ -138,8 +138,8 @@ async function generateRandomItemData(items) {
   );
   // Random cat images
   for (let i = 0; i < items.length; i++) {
-    items[i].primaryImage ||= "https://cataas.com/cat/cute?random=" + i;
-    items[i].secondaryImage ||= "https://cataas.com/cat/cute?random=" + i;
+    items[i].primaryImage ||= "https://picsum.photos/200/300?random=" + i;
+    items[i].secondaryImage ||= "https://picsum.photos/200/300?random=" + i;
   }
   return items;
 }
