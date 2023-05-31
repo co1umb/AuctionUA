@@ -31,14 +31,13 @@ function createRow(id) {
 }
 
 function dataListenerCallback(data) {
-  // Use structured Object to populate the row for each item
   for (const [id, bids] of Object.entries(data)) {
     let row = table.querySelector(`#auction-${id}`);
     if (row == null) {
       row = createRow(id);
       table.appendChild(row);
     }
-    // Extract bid data
+    // Завантажити дані лоту
     let bidCount = Object.keys(bids).length - 1;
     row.children[1].innerText = bids[0].title;
     row.children[2].innerText = `₴${bids[bidCount].amount.toFixed(2)}`;
@@ -49,7 +48,7 @@ function dataListenerCallback(data) {
         console.debug("dataListener() read from users");
       });
     } else {
-      // Remove winner name if auction was reset
+      // Прибрати ім'я переможція при оновленні аукціону
       row.children[4].innerText = "";
     }
     row.children[5].dataset.endTime = bids[0].endTime.toMillis();
@@ -77,14 +76,14 @@ function resetItem(i) {
     getDoc(docRef)
       .then((doc) => {
         console.debug("resetItem() read from auction/items");
-        // Find all bids for item i
+        // Знайти всі ставки для певного лоту
         let item = items[i];
         item.endTime = Timestamp.fromDate(item.endTime);
         let keys = Object.keys(doc.data()).sort();
         keys
           .filter((key) => key.includes(`item${i.toString().padStart(5, "0")}`))
           .forEach((key, idx) => {
-            // Mark all except bid00000 to be deleted
+            // Видалення даних
             initialState[key] = idx ? deleteField() : item;
           });
       })

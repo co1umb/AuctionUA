@@ -1,8 +1,4 @@
-// For a real auction, set this to false
-export const isDemo = true;
-
-// Specify item details
-let items = [
+ let items = [
   {
     primaryImage: "",
     title: "",
@@ -113,9 +109,8 @@ let items = [
   },
 ];
 
-// Fill missing fields with random information
+// Заповнення даних
 async function generateRandomItemData(items) {
-  // Random cat names
   await $.getJSON(
     "https://random-data-api.com/api/name/random_name",
     { size: items.length },
@@ -125,7 +120,6 @@ async function generateRandomItemData(items) {
       });
     }
   );
-  // Random lorem ipsum cat descriptions
   await $.getJSON(
     "https://random-data-api.com/api/lorem_ipsum/random_lorem_ipsum",
     { size: items.length },
@@ -136,7 +130,6 @@ async function generateRandomItemData(items) {
       });
     }
   );
-  // Random cat images
   for (let i = 0; i < items.length; i++) {
     items[i].primaryImage ||= "https://picsum.photos/200/300?random=" + i;
     items[i].secondaryImage ||= "https://picsum.photos/200/300?random=" + i;
@@ -146,11 +139,11 @@ async function generateRandomItemData(items) {
 
 export async function getItems() {
   items = isDemo ? await generateRandomItemData(items) : items;
-  // Insert the index from the unsorted array as the item ID
+  // Ідентифікатори лотів
   items.forEach((item, idx) => (item.id = idx));
-  // Parse endTime from ISO 8601 string
+  // Формат часу
   items.forEach((item) => (item.endTime = new Date(item.endTime)));
-  // Sort items in ascending end time
+  // Сортування лотів по часу
   items.sort((a, b) => a["endTime"] - b["endTime"]);
   return items;
 }

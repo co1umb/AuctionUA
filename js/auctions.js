@@ -1,34 +1,31 @@
 import { db } from "./firebase.js";
 import { getItems } from "./items.js";
-import {
-  doc,
-  onSnapshot,
-} from "https://www.gstatic.com/firebasejs/9.20.0/firebase-firestore.js";
+import {doc,onSnapshot,} from "https://www.gstatic.com/firebasejs/9.20.0/firebase-firestore.js";
 
 let grid = document.getElementById("auction-grid");
 
-// Helper function
+// Функція для розрахунку
 const divmod = (x, y) => [Math.floor(x / y), x % y];
 
-// Convert time (ms) to string for HTML clocks
+// Конвертація мілісекунд в string
 export function timeToString(time) {
   let [d, remainingHours] = divmod(time / 1000, 86400);
   let [h, remainingMinutes] = divmod(remainingHours, 3600);
   let [m, s] = divmod(remainingMinutes, 60);
-  // Make seconds more exciting when item has <10 minutes left
+  // Акцент на секунди
   s = m > 9 || h || d ? Math.round(s) : s.toFixed(1);
-  // Construct string
+  // Перехід до string
   return `${d ? d + "d " : ""}${h ? h + "h " : ""}${m ? m + "m " : ""}${
     s ? s + "s" : ""
   }`.trim();
 }
 
-// Set time on HTML clocks
+// Функція для встановлення часу
 function setClocks() {
   let now = new Date().getTime();
   document.querySelectorAll(".card").forEach((card) => {
     let timeLeft = card.querySelector(".time-left");
-    // disable bidding on finished auctions
+    // відключити можливість ставок на закінченні лоти
     if (card.dataset.endTime < now) {
       timeLeft.innerHTML = "Auction Complete";
       card.querySelector(".btn-primary").setAttribute("disabled", "");
@@ -39,13 +36,13 @@ function setClocks() {
 }
 
 function generateItemCard(auction) {
-  // create auction card
+  // Створення інформаційної картки лоту
   let col = document.createElement("div");
   col.classList.add("col");
 
   let card = document.createElement("div");
   card.classList.add("card");
-  // Add data for the info modal to read
+  // Додаткова інформація
   card.dataset.title = auction.title;
   card.dataset.detail = auction.detail;
   card.dataset.secondaryImage = auction.secondaryImage;
@@ -68,7 +65,7 @@ function generateItemCard(auction) {
   subtitle.classList.add("card-subtitle");
   body.appendChild(subtitle);
 
-  // Item status
+  // Статус лоту
   let statusTable = document.createElement("table");
   statusTable.classList.add("table");
   card.appendChild(statusTable);
@@ -101,7 +98,7 @@ function generateItemCard(auction) {
   time.classList.add("time-left");
   timeRow.appendChild(time);
 
-  // Auction actions
+  // Таблиця аукціону
   let buttonGroup = document.createElement("div");
   buttonGroup.classList.add("btn-group");
   card.appendChild(buttonGroup);
@@ -130,7 +127,6 @@ function numberWithCommas(x) {
 }
 
 function dataListenerCallback(data) {
-  // Use structured Object to populate the "Current bid" for each item
   for (const [id, bids] of Object.entries(data)) {
     let item = bids[0];
     let card = document.querySelector(`.card[data-id="${id}"]`);
@@ -139,16 +135,16 @@ function dataListenerCallback(data) {
       grid.appendChild(col);
       card = col.firstChild;
     }
-    // Update current bid
+    // Оновити ставку
     let currentBid = card.querySelector(".current-bid");
-    // Extract bid data
+    // Отримати ставку
     let bidCount = Object.keys(bids).length - 1;
     let currPound = bids[bidCount].amount.toFixed(2);
-    // Add bid data to HTML
+    // Дотати інформацію до сторінки
     currentBid.innerHTML = `₴${numberWithCommas(currPound)} [${bidCount} bid${
       bidCount != 1 ? "s" : ""
     }]`;
-    // Update everything else
+    // Оновлення даних
     card.dataset.endTime = item.endTime.toMillis();
     card.querySelector(".card-img-top").src = item.primaryImage;
     card.querySelector(".title").innerText = item.title;
@@ -161,10 +157,9 @@ function dataListenerCallback(data) {
 }
 
 export function dataListener(callback) {
-  // Listen for updates in active auctions
+  // Очікування нових даних
   onSnapshot(doc(db, "auction", "items"), (doc) => {
     console.debug("dataListener() read from auction/items");
-    // Parse flat document data into structured Object
     let data = {};
     for (const [key, details] of Object.entries(doc.data())) {
       let [item, bid] = key.split("_").map((i) => Number(i.match(/\d+/)));
